@@ -1,0 +1,30 @@
+package proto;
+
+option go_package = "go-mailing-list/proto";
+
+message EmailEntry {
+  required int64 id = 1;
+  required string email = 2;
+  required int64 confirmed_at = 3;
+  required bool opt_out = 4;
+}
+
+message CreateEmailRequest { required string email_addr = 1; }
+message GetEmailRequest { required string email_addr = 1; }
+message GetEmailBatchRequest {
+  required int32  page = 1;
+  required int32 count = 3;
+}
+message DeleteEmailRequest { required string email_addr = 1; }
+message UpdateEmailRequest { required EmailEntry email_entry = 1; }
+
+message EmailResponse { optional EmailEntry email_entry = 1; }
+message EmailBatchResponse { repeated EmailEntry email_entries = 1; }
+
+service MailingListService {
+  rpc CreateEmail(CreateEmailRequest) returns (EmailResponse) {};
+  rpc GetEmail(GetEmailRequest) returns (EmailResponse) {};
+  rpc GetEmailBatch(GetEmailBatchRequest) returns (EmailBatchResponse) {};
+  rpc DeleteEmail(DeleteEmailRequest) returns (EmailResponse) {};
+  rpc UpdateEmail(UpdateEmailRequest) returns (EmailResponse) {};
+}

@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"github.com/alexflint/go-arg"
+	"go-mailing-list/grpcapi"
 	"go-mailing-list/jsonapi"
 	"go-mailing-list/mdb"
 	"log"
@@ -12,6 +13,7 @@ import (
 var args struct {
 	DbPath   string `arg:"env:MAILINGLIST_DB"`
 	BindJson string `arg:"env:MAILINGLIST_BIND_JSON"`
+	BindGrpc string `arg:"env:MAILINGLIST_BIND_GRPC"`
 }
 
 func main() {
@@ -22,6 +24,10 @@ func main() {
 	}
 	if args.BindJson == "" {
 		args.BindJson = ":8080"
+	}
+
+	if args.BindGrpc == "" {
+		args.BindGrpc = ":8081"
 	}
 
 	log.Printf("using database '%v' \n", args.DbPath)
@@ -40,6 +46,13 @@ func main() {
 	go func() {
 		log.Printf("starting json server on %v\n", args.BindJson)
 		jsonapi.Serve(db, args.BindJson)
+		wg.Done()
+	}()
+
+	wg.Add(1)
+	go func() {
+		log.Printf("starting gRPC server on %v\n", args.BindGrpc)
+		grpcapi.Serve(db, args.BindGrpc)
 		wg.Done()
 	}()
 

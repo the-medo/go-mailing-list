@@ -87,7 +87,7 @@ func UpdateEmail(db *sql.DB, entry EmailEntry) error {
 	_, err := db.Exec(`
 		INSERT INTO emails(email, confirmed_at, opt_out) VALUES (?, ?, ?)
 		ON CONFLICT(email) DO UPDATE SET
-			confirmed_at=?
+			confirmed_at=?,
 			opt_out=?
 	`, entry.Email, t, entry.OptOut, t, entry.OptOut)
 
@@ -117,8 +117,7 @@ type GetEmailBatchQueryParams struct {
 
 func GetEmailBatch(db *sql.DB, params GetEmailBatchQueryParams) ([]EmailEntry, error) {
 	var empty []EmailEntry
-
-	rows, err := db.Query(` SELECT id, email, confirmed_at, opt_out FROM emails WHERE opt_out = false ORDER BY id ASC LIMIT ? OFFSET ?`, params.Count, params.Page-1*params.Count)
+	rows, err := db.Query(` SELECT id, email, confirmed_at, opt_out FROM emails WHERE opt_out = false ORDER BY id ASC LIMIT ? OFFSET ?`, params.Count, (params.Page-1)*params.Count)
 
 	defer rows.Close()
 
